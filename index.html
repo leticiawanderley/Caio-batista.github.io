@@ -10,19 +10,6 @@
     <title>Laboratório 2 -  Visualização de dados - Caio Batista</title>
   </head>
   <body>
-    <style>
-        .bar {
-            fill: steelblue;
-        }
-
-        .bar:hover {
-            fill: brown;
-        }
-
-        .axis--x path {
-            display: none;
-        }
-    </style>
     <svg width="960" height="500"></svg>
     <nav id="navbar" class="navbar navbar-inverse navbar-fixed-top" style="background: #003399" >
       <div class="container" style="background: #003399 " >
@@ -88,10 +75,11 @@
                                       .attr("width", x.bandwidth())
                                       .attr("height", function(d) { return height - y(d.frequency); });
                               });
-
                           </script>
                       </div>
                   </div>
+                  <div id="chart"></div>
+                  <script type="text/javascript" src="condegramSpiralPlot.js"></script>
               </div>
           </div>
       </div>
