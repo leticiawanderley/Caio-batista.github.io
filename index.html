@@ -1,203 +1,101 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-    .bar {
-        fill: steelblue;
-    }
-
-    .bar:hover {
-        fill: brown;
-    }
-
-    .axis--x path {
-        display: none;
-    }
-
-</style>
-<svg width="960" height="500"></svg>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-
-<head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
-          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
     <link href="css/styles.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
     <meta charset="UTF-8">
     <title>Laboratório 2 -  Visualização de dados - Caio Batista</title>
-</head>
-<div>
+  </head>
+  <body>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
 
+        .bar:hover {
+            fill: brown;
+        }
 
-<nav id="navbar" class="navbar navbar-inverse navbar-fixed-top" style="background: #003399" >
-    <div class="container" style="background: #003399 " >
-        <div class="navbar-header" style="background: #003399">
-            <a class="navbar-brand" href="#" style="text-align: center">Laboratório 2 -  Visualização de dados - Caio Batista</a>
-        </div>
+        .axis--x path {
+            display: none;
+        }
+    </style>
+    <svg width="960" height="500"></svg>
+    <nav id="navbar" class="navbar navbar-inverse navbar-fixed-top" style="background: #003399" >
+      <div class="container" style="background: #003399 " >
+          <div class="navbar-header" style="background: #003399">
+              <a class="navbar-brand" href="#" style="text-align: center">Laboratório 2 -  Visualização de dados - Caio Batista</a>
+          </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="main">
+          <div class="row">
+              <div class="container">
+                  <h1>Quais os números mais escolhidos na primeira pergunta? E na sétima?</h1>
+                  <h3>Para entendermos a visualização, vemos o eixo X como as respostas, tanto para a primeira pergunta como para a
+                  segunda. E no eixo Y vemos a frequência das respostas em porcentagem.</h3>
+                  <h3>Para entender a parte do eixo X, temos que os nomes seguem o padrão Pri_X  e Set_X, que são as respostas
+                  para a primeira pergunta e sétima do formulário. Sendo X o número escolhido</h3>
+                  <div class="col-xs-12">
+                      <div id="chart-container">
+                          <script>
+
+                              var svg = d3.select("svg"),
+                                  margin = {top: 20, right: 20, bottom: 30, left: 40},
+                                  width = +svg.attr("width") - margin.left - margin.right,
+                                  height = +svg.attr("height") - margin.top - margin.bottom;
+
+                              var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+                                  y = d3.scaleLinear().rangeRound([height, 0]);
+
+                              var g = svg.append("g")
+                                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                              d3.tsv("data.tsv", function(d) {
+                                  d.frequency = +d.frequency;
+                                  return d;
+                              }, function(error, data) {
+                                  if (error) throw error;
+
+                                  x.domain(data.map(function(d) { return d.letter; }));
+                                  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
+
+                                  g.append("g")
+                                      .attr("class", "axis axis--x")
+                                      .attr("transform", "translate(0," + height + ")")
+                                      .call(d3.axisBottom(x));
+
+                                  g.append("g")
+                                      .attr("class", "axis axis--y")
+                                      .call(d3.axisLeft(y).ticks(10, "%"))
+                                      .append("text")
+                                      .attr("transform", "rotate(-90)")
+                                      .attr("y", 6)
+                                      .attr("dy", "0.71em")
+                                      .attr("text-anchor", "end")
+                                      .text("Frequency");
+
+                                  g.selectAll(".bar")
+                                      .data(data)
+                                      .enter().append("rect")
+                                      .attr("class", "bar")
+                                      .attr("x", function(d) { return x(d.letter); })
+                                      .attr("y", function(d) { return y(d.frequency); })
+                                      .attr("width", x.bandwidth())
+                                      .attr("height", function(d) { return height - y(d.frequency); });
+                              });
+
+                          </script>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
     </div>
-</nav>
-
-
-
-<div class="container">
-
-    <div class="main">
-        <div class="row">
-            <div class="container">
-                <h1>Quais os números mais escolhidos na primeira pergunta? E na sétima?</h1>
-                <h3>Para entendermos a visualização, vemos o eixo X como as respostas, tanto para a primeira pergunta como para a
-                segunda. E no eixo Y vemos a frequência das respostas em porcentagem.</h3>
-                <h3>Para entender a parte do eixo X, temos que os nomes seguem o padrão Pri_X  e Set_X, que são as respostas
-                para a primeira pergunta e sétima do formulário. Sendo X o número escolhido</h3>
-                <div class="col-xs-12">
-                    <div id="chart-container">
-
-                        <script>
-
-                            var svg = d3.select("svg"),
-                                margin = {top: 20, right: 20, bottom: 30, left: 40},
-                                width = +svg.attr("width") - margin.left - margin.right,
-                                height = +svg.attr("height") - margin.top - margin.bottom;
-
-                            var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-                                y = d3.scaleLinear().rangeRound([height, 0]);
-
-                            var g = svg.append("g")
-                                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                            d3.tsv("data.tsv", function(d) {
-                                d.frequency = +d.frequency;
-                                return d;
-                            }, function(error, data) {
-                                if (error) throw error;
-
-                                x.domain(data.map(function(d) { return d.letter; }));
-                                y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
-
-                                g.append("g")
-                                    .attr("class", "axis axis--x")
-                                    .attr("transform", "translate(0," + height + ")")
-                                    .call(d3.axisBottom(x));
-
-                                g.append("g")
-                                    .attr("class", "axis axis--y")
-                                    .call(d3.axisLeft(y).ticks(10, "%"))
-                                    .append("text")
-                                    .attr("transform", "rotate(-90)")
-                                    .attr("y", 6)
-                                    .attr("dy", "0.71em")
-                                    .attr("text-anchor", "end")
-                                    .text("Frequency");
-
-                                g.selectAll(".bar")
-                                    .data(data)
-                                    .enter().append("rect")
-                                    .attr("class", "bar")
-                                    .attr("x", function(d) { return x(d.letter); })
-                                    .attr("y", function(d) { return y(d.frequency); })
-                                    .attr("width", x.bandwidth())
-                                    .attr("height", function(d) { return height - y(d.frequency); });
-                            });
-
-                        </script>
-
-
-
-
-
-                    </div>
-
-
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="aa"></div>
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
-        integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="
-        crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.4.0/d3.min.js"
-        integrity="sha256-zbE3mv7cXuSkW7mhK6Y5vnY6eXmPZPPRUYpUcNfVM/A="
-        crossorigin="anonymous"></script>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-
-
-
-
-
-
-
-
-
-<!---
-<script>
-
-// set the dimensions and margins of the graph
-var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
-// parse the date / time
-var parseTime = d3.timeParse("%d-%b-%y");
-
-// set the ranges
-var x = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
-
-// define the line
-var valueline = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
-
-// append the svg obgect to the body of the page
-// appends a 'group' element to 'svg'
-// moves the 'group' element to the top left margin
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-// Get the data
-d3.csv("data.csv", function(error, data) {
-  if (error) throw error;
-
-  // format the data
-  data.forEach(function(d) {
-      d.date = parseTime(d.date);
-      d.close = +d.close;
-  });
-
-  // Scale the range of the data
-  x.domain(d3.extent(data, function(d) { return d.date; }));
-  y.domain([0, d3.max(data, function(d) { return d.close; })]);
-
-  // Add the valueline path.
-  svg.append("path")
-      .data([data])
-      .attr("class", "line")
-      .attr("d", valueline);
-
-  // Add the X Axis
-  svg.append("g")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
-
-  // Add the Y Axis
-  svg.append("g")
-      .call(d3.axisLeft(y));
-
-});
-
-</script>
-
---->
+  </body>
+</html>
 
