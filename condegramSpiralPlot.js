@@ -19,8 +19,9 @@
       .range([40, r]);
 
     var svgLab3 = d3.select("#chart").append("svg")
-      .attr("width", widthLab3 + marginLab3.right + marginLab3.left)
-      .attr("height", heightLab3 + marginLab3.left + marginLab3.right)
+      .attr('version', '1.1')
+      .attr('viewBox', '0 0 ' + (widthLab3 + marginLab3.right + marginLab3.left) + ' ' + (heightLab3 + marginLab3.left + marginLab3.right))
+      .attr('width', '70%')
       .append("g")
       .attr("transform", "translate(" + widthLab3 / 2 + "," + heightLab3 / 2 + ")");
 
