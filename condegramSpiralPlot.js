@@ -1,7 +1,7 @@
-var width = 500,
-      height = 500,
+var width = 600,
+      height = 900,
       start = 0,
-      end = 2.25,
+      end = 2.5,
       numSpirals = 1,
       margin = {top:50,bottom:50,left:50,right:50};
 
@@ -10,7 +10,7 @@ var width = 500,
     };
 
     // used to assign nodes color by group
-    var color = d3.scaleOrdinal(d3.schemeCategory10);
+    var color = d3.scaleOrdinal(['#1f77b4','#ff7f0e']);
 
     var r = d3.min([width, height]) / 2 - 40;
 
@@ -39,142 +39,136 @@ var width = 500,
       .style("stroke", "steelblue");
 
     var spiralLength = path.node().getTotalLength(),
-        N = 18,
+        N = 60,
         barWidth = (spiralLength / N) - 1;
     var someData = [];
-    d3.tsv("data.tsv", function(d) {
+    d3.tsv("dataLab3.tsv", function(d) {
       d.frequency = +d.frequency;
       someData.push({
-        question: d.question,
+        number: d.number,
         frequency: d.frequency,
-        group: d.number
+        group: d.question
       });
       return d;
     }, function(error, data) {
       if (error) throw error;
-
-    });
-   /* for (var i = 0; i < N; i++) {
-      var currentDate = new Date();
-      currentDate.setDate(currentDate.getDate() + i);
-      someData.push({
-        date: currentDate,
-        value: Math.random(),
-        group: currentDate.getMonth()
-      });
-    }*/
-
-    var timeScale = d3.scaleTime()
-      .domain(d3.extent(someData, function(d){
-        return d.question;
-      }))
-      .range([0, spiralLength]);
-    
-    // yScale for the bar height
-    var yScale = d3.scaleLinear()
-      .domain([0, d3.max(someData, function(d){
-        return d.frequency;
-      })])
-      .range([0, (r / numSpirals) - 30]);
-
-    svg.selectAll("rect")
-      .data(someData)
-      .enter()
-      .append("rect")
-      .attr("x", function(d,i){
-        
-        var linePer = timeScale(d.question),
-            posOnLine = path.node().getPointAtLength(linePer),
-            angleOnLine = path.node().getPointAtLength(linePer - barWidth);
+      var scale = d3.scaleLinear()
+        .domain(d3.extent(someData, function(d){
+          return (d.number) + d.group/2;
+        }))
+        .range([0, spiralLength]);
       
-        d.linePer = linePer; // % distance are on the spiral
-        d.x = posOnLine.x; // x postion on the spiral
-        d.y = posOnLine.y; // y position on the spiral
+      // yScale for the bar height
+      var yScale = d3.scaleLinear()
+        .domain([0, d3.max(someData, function(d){
+          return d.frequency;
+        })])
+        .range([0, (r / numSpirals) - 30]);
+
+      svg.selectAll("rect")
+        .data(someData)
+        .enter()
+        .append("rect")
+        .attr("x", function(d,i){
+          
+          var linePer = scale(d.number + d.group/2),
+              posOnLine = path.node().getPointAtLength(linePer),
+              angleOnLine = path.node().getPointAtLength(linePer - barWidth);
         
-        d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90; //angle at the spiral position
+          d.linePer = linePer; // % distance are on the spiral
+          d.x = posOnLine.x; // x postion on the spiral
+          d.y = posOnLine.y; // y position on the spiral
+          d.a = (Math.atan2(angleOnLine.y, angleOnLine.x) * 180 / Math.PI) - 90; //angle at the spiral position
 
-        return d.x;
-      })
-      .attr("y", function(d){
-        return d.y;
-      })
-      .attr("width", function(d){
-        return barWidth;
-      })
-      .attr("height", function(d){
-        return yScale(d.frequency);
-      })
-      .style("fill", function(d){return color(d.group);})
-      .style("stroke", "none")
-      .attr("transform", function(d){
-        return "rotate(" + d.a + "," + d.x  + "," + d.y + ")"; // rotate the bar
-      });
-    
-    // add date labels
-    var tF = d3.timeFormat("%b %Y"),
-        firstInMonth = {};
-
-    svg.selectAll("text")
-      .data(someData)
-      .enter()
-      .append("text")
-      .attr("dy", 10)
-      .style("text-anchor", "start")
-      .style("font", "10px arial")
-      .append("textPath")
-      // only add for the first of each month
-      /*.filter(function(d){
-        var sd = tF(d.date);
-        if (!firstInMonth[sd]){
-          firstInMonth[sd] = 1;
-          return true;
-        }
-        return false;
-      })
-      .text(function(d){
-        return tF(d.date);
-      })
-      // place text along spiral
-      .attr("xlink:href", "#spiral")
-      .style("fill", "grey")
-      .attr("startOffset", function(d){
-        return ((d.linePer / spiralLength) * 100) + "%";
-      })*/
-
-
-    var tooltip = d3.select("#chart")
-    .append('div')
-    .attr('class', 'tooltip');
-
-    tooltip.append('div')
-    .attr('class', 'date');
-    tooltip.append('div')
-    .attr('class', 'value');
-
-    svg.selectAll("rect")
-    .on('mouseover', function(d) {
-
-        tooltip.select('.date').html("Date: <b>" + d.question + "</b>");
-        tooltip.select('.value').html("Value: <b>" + d.frequency + "<b>");
-
-        d3.select(this)
-        .style("fill","#FFFFFF")
-        .style("stroke","#000000")
-        .style("stroke-width","2px");
-
-        tooltip.style('display', 'block');
-        tooltip.style('opacity',2);
-
-    })
-    .on('mousemove', function(d) {
-        tooltip.style('top', (d3.event.layerY + 10) + 'px')
-        .style('left', (d3.event.layerX - 25) + 'px');
-    })
-    .on('mouseout', function(d) {
-        d3.selectAll("rect")
+          return d.x;
+        })
+        .attr("y", function(d){
+          return d.y;
+        })
+        .attr("width", function(d){
+          return barWidth;
+        })
+        .attr("height", function(d){
+          return yScale(d.frequency);
+        })
         .style("fill", function(d){return color(d.group);})
         .style("stroke", "none")
+        .attr("transform", function(d){
+          return "rotate(" + d.a + "," + d.x  + "," + d.y + ")"; // rotate the bar
+        });
+      
+      svg.selectAll("text")
+        .data(someData)
+        .enter()
+        .append("text")
+        .attr("dy", 15)
+        .attr("dx", 5)
+        .style("text-anchor", "start")
+        .style("font", "12px arial")
+        .append("textPath")
+        .text(function(d){
+          return d.number;
+        })
+        // place text along spiral
+        .attr("xlink:href", "#spiral")
+        .style("fill", "grey")
+        .attr("startOffset", function(d){
+          if (d.group == 1) {
+            return ((d.linePer / spiralLength) * 100) + "%";
+          }
+          return;
+        })
 
-        tooltip.style('display', 'none');
-        tooltip.style('opacity',0);
+      var tooltip = d3.select("#chart")
+        .append('div')
+        .attr('class', 'tooltip');
+
+        tooltip.append('div')
+        .attr('class', 'question');
+        tooltip.append('div')
+        .attr('class', 'number');
+        tooltip.append('div')
+        .attr('class', 'frequency');
+
+      svg.selectAll("rect")
+        .on('mouseover', function(d) {
+
+            tooltip.select('.question').html("Pergunta: <b>" + d.group + "</b>");
+            tooltip.select('.number').html("Número escolhido: <b>" + d.number + "</b>");
+            tooltip.select('.frequency').html("Frequência: <b>" + d.frequency + "%<b>");
+
+            tooltip.style('display', 'block');
+            tooltip.style('opacity',2);
+
+        })
+        .on('mousemove', function(d) {
+            tooltip.style('top', (d3.event.layerY + 10) + 'px')
+            .style('left', (d3.event.layerX - 25) + 'px');
+        })
+        .on('mouseout', function(d) {
+            tooltip.style('display', 'none');
+            tooltip.style('opacity',0);
+        });
+
+      var legend = svg.selectAll(".legend")
+        .data(["Pergunta 1", "Pergunta 7"])
+        .enter().append("g")
+          .attr("class", "legend")
+          .attr("transform", function(d, i) { return "translate(-" + margin.left * 9 + ", " + (i+2) * 20 + ")"; })
+          .style("font", "12px sans-serif");
+
+        legend.append("rect")
+            .attr("x", width + 18)
+            .attr("width", 18)
+            .attr("height", 18)
+            .attr("fill", color);
+
+        legend.append("text")
+            .attr("x", width + 44)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .attr("text-anchor", "start")
+            .text(function(d) { return d; });
     });
+
+    
