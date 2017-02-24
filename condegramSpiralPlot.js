@@ -1,9 +1,9 @@
-var width = 600,
-      height = 900,
+    var widthLab3 = 600,
+      heightLab3 = 900,
       start = 0,
       end = 2.5,
       numSpirals = 1,
-      margin = {top:50,bottom:50,left:50,right:50};
+      marginLab3 = {top:50, bottom:50, left:50, right:50};
 
     var theta = function(r) {
       return numSpirals * Math.PI * r;
@@ -12,17 +12,17 @@ var width = 600,
     // used to assign nodes color by group
     var color = d3.scaleOrdinal(['#1f77b4','#ff7f0e']);
 
-    var r = d3.min([width, height]) / 2 - 40;
+    var r = d3.min([widthLab3, heightLab3]) / 2 - 40;
 
     var radius = d3.scaleLinear()
       .domain([start, end])
       .range([40, r]);
 
-    var svg = d3.select("#chart").append("svg")
-      .attr("width", width + margin.right + margin.left)
-      .attr("height", height + margin.left + margin.right)
+    var svgLab3 = d3.select("#chart").append("svg")
+      .attr("width", widthLab3 + marginLab3.right + marginLab3.left)
+      .attr("height", heightLab3 + marginLab3.left + marginLab3.right)
       .append("g")
-      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+      .attr("transform", "translate(" + widthLab3 / 2 + "," + heightLab3 / 2 + ")");
 
     var points = d3.range(start, end + 0.001, (end - start) / 1000);
 
@@ -31,7 +31,7 @@ var width = 600,
       .angle(theta)
       .radius(radius);
 
-    var path = svg.append("path")
+    var path = svgLab3.append("path")
       .datum(points)
       .attr("id", "spiral")
       .attr("d", spiral)
@@ -41,6 +41,7 @@ var width = 600,
     var spiralLength = path.node().getTotalLength(),
         N = 60,
         barWidth = (spiralLength / N) - 1;
+
     var someData = [];
     d3.tsv("dataLab3.tsv", function(d) {
       d.frequency = +d.frequency;
@@ -65,7 +66,7 @@ var width = 600,
         })])
         .range([0, (r / numSpirals) - 30]);
 
-      svg.selectAll("rect")
+      svgLab3.selectAll("rect")
         .data(someData)
         .enter()
         .append("rect")
@@ -97,7 +98,7 @@ var width = 600,
           return "rotate(" + d.a + "," + d.x  + "," + d.y + ")"; // rotate the bar
         });
       
-      svg.selectAll("text")
+      svgLab3.selectAll("text")
         .data(someData)
         .enter()
         .append("text")
@@ -107,16 +108,15 @@ var width = 600,
         .style("font", "12px arial")
         .append("textPath")
         .text(function(d){
-          return d.number;
+            if (d.group == 1) {
+                return d.number;
+            }
         })
         // place text along spiral
         .attr("xlink:href", "#spiral")
         .style("fill", "grey")
-        .attr("startOffset", function(d){
-          if (d.group == 1) {
+        .attr("startOffset", function (d) {
             return ((d.linePer / spiralLength) * 100) + "%";
-          }
-          return;
         })
 
       var tooltip = d3.select("#chart")
@@ -130,7 +130,7 @@ var width = 600,
         tooltip.append('div')
         .attr('class', 'frequency');
 
-      svg.selectAll("rect")
+      svgLab3.selectAll("rect")
         .on('mouseover', function(d) {
 
             tooltip.select('.question').html("Pergunta: <b>" + d.group + "</b>");
@@ -150,21 +150,21 @@ var width = 600,
             tooltip.style('opacity',0);
         });
 
-      var legend = svg.selectAll(".legend")
+      var legend = svgLab3.selectAll(".legend")
         .data(["Pergunta 1", "Pergunta 7"])
         .enter().append("g")
           .attr("class", "legend")
-          .attr("transform", function(d, i) { return "translate(-" + margin.left * 9 + ", " + (i+2) * 20 + ")"; })
+          .attr("transform", function(d, i) { return "translate(-" + marginLab3.left * 9 + ", " + (i+2) * 20 + ")"; })
           .style("font", "12px sans-serif");
 
         legend.append("rect")
-            .attr("x", width + 18)
+            .attr("x", widthLab3 + 18)
             .attr("width", 18)
             .attr("height", 18)
             .attr("fill", color);
 
         legend.append("text")
-            .attr("x", width + 44)
+            .attr("x", widthLab3 + 44)
             .attr("y", 9)
             .attr("dy", ".35em")
             .attr("text-anchor", "start")

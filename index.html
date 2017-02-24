@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8">
@@ -27,8 +27,8 @@
     <div class="container" id="original">
       <div class="main">
           <div class="row">
+              <svg width="960" height="500" id="originalChart"></svg>
               <div class="container">
-                  <svg width="960" height="500"></svg>
                   <h1>Quais os números mais escolhidos na primeira pergunta? E na sétima?</h1>
                   <h3>Para entendermos a visualização, vemos o eixo X como as respostas, tanto para a primeira pergunta como para a
                   segunda. E no eixo Y vemos a frequência das respostas em porcentagem.</h3>
@@ -37,31 +37,25 @@
                   <div class="col-xs-12">
                       <div id="chart-container">
                           <script>
-                              var svg = d3.select("svg"),
-                                  margin = {top: 20, right: 20, bottom: 30, left: 40},
-                                  width = +svg.attr("width") - margin.left - margin.right,
-                                  height = +svg.attr("height") - margin.top - margin.bottom;
-
+                              var svg = d3.select("#originalChart"),
+                                margin = { top: 20, right: 20, bottom: 30, left: 40 },
+                                width = +svg.attr("width") - margin.left - margin.right,
+                                height = +svg.attr("height") - margin.top - margin.bottom;
                               var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
                                   y = d3.scaleLinear().rangeRound([height, 0]);
-
                               var g = svg.append("g")
                                   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                              d3.tsv("data.tsv", function(d) {
+                              d3.tsv("data.tsv", function (d) {
                                   d.frequency = +d.frequency;
                                   return d;
-                              }, function(error, data) {
+                              }, function (error, data) {
                                   if (error) throw error;
-
-                                  x.domain(data.map(function(d) { return d.letter; }));
-                                  y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
-
+                                  x.domain(data.map(function (d) { return d.letter; }));
+                                  y.domain([0, d3.max(data, function (d) { return d.frequency; })]);
                                   g.append("g")
                                       .attr("class", "axis axis--x")
                                       .attr("transform", "translate(0," + height + ")")
                                       .call(d3.axisBottom(x));
-
                                   g.append("g")
                                       .attr("class", "axis axis--y")
                                       .call(d3.axisLeft(y).ticks(10, "%"))
@@ -71,15 +65,14 @@
                                       .attr("dy", "0.71em")
                                       .attr("text-anchor", "end")
                                       .text("Frequency");
-
                                   g.selectAll(".bar")
                                       .data(data)
                                       .enter().append("rect")
                                       .attr("class", "bar")
-                                      .attr("x", function(d) { return x(d.letter); })
-                                      .attr("y", function(d) { return y(d.frequency); })
+                                      .attr("x", function (d) { return x(d.letter); })
+                                      .attr("y", function (d) { return y(d.frequency); })
                                       .attr("width", x.bandwidth())
-                                      .attr("height", function(d) { return height - y(d.frequency); });
+                                      .attr("height", function (d) { return height - y(d.frequency); });
                               });
                           </script>
                       </div>
